@@ -1,0 +1,129 @@
+*, .btn:active, .btn:focus{
+    outline: none;
+  }
+  
+  .slider{
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    background: #dbdbdb;
+    position: relative;
+    outline: none;
+    margin-bottom: 20px;
+  }
+  .slider-point{
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #A7CB00;
+    position: absolute;
+    top: -5px;
+    -moz-transition: left 0.3s;
+    -webkit-transition: left 0.3s;
+    transition: left 0.3s;
+  }
+  
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #A7CB00;
+    cursor: pointer;
+    -moz-transition: background .15s ease-in-out;
+    -webkit-transition: background .15s ease-in-out;
+    transition: background .15s ease-in-out;
+  }
+  
+  .slider::-webkit-slider-thumb:hover {
+    background: #7B9500;
+  }
+  
+  .slider:active::-webkit-slider-thumb {
+    background: #7B9500;
+  }
+  
+  .slider::-moz-range-thumb {
+    width:20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: #A7CB00;
+    cursor: pointer;
+    -moz-transition: background .15s ease-in-out;
+    -webkit-transition: background .15s ease-in-out;
+    transition: background .15s ease-in-out;
+  }
+  .slider::-moz-range-thumb:hover {
+    background: #7B9500;
+  }
+  
+  .slider:active::-moz-range-thumb {
+    background: #7B9500;
+  }
+  
+  .spinner {
+    width: 70px;
+    text-align: center;
+    float: right;
+  }
+  
+  .spinner > div {
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
+    animation: bouncedelay 1.4s infinite ease-in-out;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+  }
+  
+  .spinner .bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+  }
+  
+  .spinner .bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+  }
+  
+  @-webkit-keyframes bouncedelay {
+    0%, 80%, 100% { -webkit-transform: scale(0.0) }
+    40% { -webkit-transform: scale(1.0) }
+  }
+  
+  @keyframes bouncedelay {
+    0%, 80%, 100% { 
+      transform: scale(0.0);
+      -webkit-transform: scale(0.0);
+    } 40% { 
+      transform: scale(1.0);
+      -webkit-transform: scale(1.0);
+    }
+  }
+
+  #mensajeDatos {
+    font-weight: bold;
+    color: red;
+  }
+
+  .input-group-addon{
+    font-size: 20px;
+    align-self: center;
+    margin-right: 5px;
+    width: 34px;
+    text-align: center;
+
+  }
+
+  .divBotonCalculadora{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    gap: 5px;
+    height: auto;
+  }
