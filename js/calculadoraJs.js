@@ -31,15 +31,15 @@ class CalculadoraPrestamos{
      */
     imprimeResultado(){
   
-      document.getElementById("mensajeDatos").innerHTML = ``
+      $("#mensajeDatos").html(``)
   
-      document.getElementById("divBotonCalculadora").innerHTML = `<div class="divBotonCalculadora">
+      $("#divBotonCalculadora").html(`<div class="divBotonCalculadora">
       <button type="button" class="btn btn-primary btn-block" onclick="capturaYEjecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
       <button type="button" class="btn btn-info btn-block" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
-      </div>`
+      </div>`)
   
-      document.getElementById("pagoMensual").innerHTML = `${this.montoAPagarUnMes.toLocaleString()} CLP`
-      document.getElementById("pagoTotal").innerHTML = `${this.montoAPagarTotal.toLocaleString()} CLP`
+      $("#pagoMensual").html(`${this.montoAPagarUnMes.toLocaleString()} CLP`)
+      $("#pagoTotal").html(`${this.montoAPagarTotal.toLocaleString()} CLP`)
     }
   
     /**
@@ -59,17 +59,17 @@ class CalculadoraPrestamos{
      * @param {number} this.meses
      */
     validaCamposYEjecuta(){
-        document.getElementById("pagoMensual").innerHTML = ``
-        document.getElementById("pagoTotal").innerHTML = ``
+      $("#pagoMensual").html(``)
+      $("#pagoTotal").html(``)
         var validador = true
         for(let i = 0; i < this.camposDeValores.length; i++){
             if(this.camposDeValores[i].value == ""){
-                document.getElementById("mensajeDatos").innerHTML = 'Debe ingresar datos en todos los campos'
+                $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
                 this.camposDeValores[i].focus()
                 validador = false
                 break
             }if(this.camposDeValores[i].value == 0){
-                document.getElementById("mensajeDatos").innerHTML = `El valor ingresado debe ser mayor a 0`
+              $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
                 this.camposDeValores[i].focus()
                 validador = false
                 break
@@ -92,10 +92,10 @@ class CalculadoraPrestamos{
 */
 function capturaYEjecutaCalculadora(){
 
-  document.getElementById("pagoMensual").innerHTML = ``
-  document.getElementById("pagoTotal").innerHTML = ``
+  $("#pagoMensual").html(``)
+  $("#pagoTotal").html(``)
 
-  let informacionPrestamo = new CalculadoraPrestamos ([document.getElementById("monto"),document.getElementById("tasa"),document.getElementById("meses")])
+  let informacionPrestamo = new CalculadoraPrestamos ([$("#monto"),$("#tasa"),$("#meses")])
 
   informacionPrestamo.validaCamposYEjecuta()
 
@@ -118,11 +118,11 @@ function capturaYEjecutaCalculadora(){
 
   if(ultimoCalculo != null){
     
-    document.getElementById("mensajeUltimoCalculo").innerHTML = `<br>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°<br><h4>Total a pagar calculo anterior: 
-    ${ultimoCalculo[1]}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0]}</small></h4>`
+    $("#mensajeUltimoCalculo").html(`<br>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°<br><h4>Total a pagar calculo anterior: 
+    ${ultimoCalculo[1]}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0]}</small></h4>`)
     
   }else{
-    document.getElementById("mensajeUltimoCalculo").innerHTML = ``
+    $("#mensajeUltimoCalculo").html(``)
   }
 
   informacionPrestamo.guardadoSessionStorage()
@@ -133,16 +133,15 @@ function capturaYEjecutaCalculadora(){
  *@event 
 */
 function actualizaMeses(){
-    document.getElementById("rangoMeses").innerHTML = `${document.getElementById("meses").value}`
+  $("#rangoMeses").html(`${$("#meses").value}`)
 }
-
 
 /**
 * Funcion modifica el layout del index para que se muestre la calculadora al usar boton
 *@event 
 */
 function crearCalculadora() {
-    document.getElementById("espacioCalculadora").innerHTML = `<div class="container">
+  $("#espacioCalculadora").html(`<div class="container">
     <div>
       <div">
         <form class="credit">
@@ -179,7 +178,7 @@ function crearCalculadora() {
 
       </div>
     </div>
-  </div>`
+  </div>`)
 
 }
 
