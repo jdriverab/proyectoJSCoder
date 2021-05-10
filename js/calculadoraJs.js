@@ -63,22 +63,30 @@ class CalculadoraPrestamos{
       $("#pagoTotal").html(``)
         var validador = true
         for(let i = 0; i < this.camposDeValores.length; i++){
-            if(this.camposDeValores[i].value == ""){
+            if(this.camposDeValores[i].value == "" || this.camposDeValores[i].value == NaN){
+
                 $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
-                this.camposDeValores[i].focus()
-                validador = false
-                break
+
+                $("#mensajeDatos").fadeIn(1400)
+
+              this.camposDeValores[i].focus()
+              validador = false
+              break
+
             }if(this.camposDeValores[i].value == 0){
               $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
-                this.camposDeValores[i].focus()
-                validador = false
-                break
+
+              $("#mensajeDatos").fadeIn(1400)
+              this.camposDeValores[i].focus()
+              validador = false
+              break
             }
         }
 
         if(validador){
-            this.calculaResultadoPrestamo()
-            this.imprimeResultado()
+          $("#mensajeDatos").fadeOut(1400)
+          this.calculaResultadoPrestamo()
+          this.imprimeResultado()
         }
     }
 }
@@ -94,8 +102,11 @@ function capturaYEjecutaCalculadora(){
 
   $("#pagoMensual").html(``)
   $("#pagoTotal").html(``)
+  $("#mensajeUltimoCalculo").fadeOut(800)
 
-  let informacionPrestamo = new CalculadoraPrestamos ([$("#monto"),$("#tasa"),$("#meses")])
+  let informacionPrestamo = new CalculadoraPrestamos ([document.getElementById("monto"),document.getElementById("tasa"),document.getElementById("meses")])
+
+  console.log(informacionPrestamo)
 
   informacionPrestamo.validaCamposYEjecuta()
 
@@ -116,13 +127,19 @@ function capturaYEjecutaCalculadora(){
 
   console.log(ultimoCalculo)
 
-  if(ultimoCalculo != null){
-    
+  if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0){
+
+    $("#mensajeUltimoCalculo").fadeIn(1200)
+
     $("#mensajeUltimoCalculo").html(`<br>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°<br><h4>Total a pagar calculo anterior: 
-    ${ultimoCalculo[1]}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0]}</small></h4>`)
+    ${ultimoCalculo[1].toLocaleString()}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}</small></h4>`)
     
   }else{
-    $("#mensajeUltimoCalculo").html(``)
+
+    $("#mensajeUltimoCalculo").fadeOut(1200,()=>{
+      // $("#mensajeUltimoCalculo").html(``)
+    })
+
   }
 
   informacionPrestamo.guardadoSessionStorage()
@@ -133,7 +150,7 @@ function capturaYEjecutaCalculadora(){
  *@event 
 */
 function actualizaMeses(){
-  $("#rangoMeses").html(`${$("#meses").value}`)
+  $("#rangoMeses").html(`${$("#meses").val()}`)
 }
 
 /**
@@ -141,7 +158,11 @@ function actualizaMeses(){
 *@event 
 */
 function crearCalculadora() {
-  $("#espacioCalculadora").html(`<div class="container">
+
+  $("#espacioCalculadora").css("display","none")
+
+  $("#espacioCalculadora").html(
+  `<div class="container">
     <div>
       <div">
         <form class="credit">
@@ -180,6 +201,7 @@ function crearCalculadora() {
     </div>
   </div>`)
 
+  $("#espacioCalculadora").fadeIn(2500)
 }
 
 

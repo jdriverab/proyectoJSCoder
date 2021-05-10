@@ -109,6 +109,7 @@
   #mensajeDatos {
     font-weight: bold;
     color: red;
+    display: none;
   }
 
   .input-group-addon{
@@ -126,4 +127,8 @@
     justify-content: space-between;
     gap: 5px;
     height: auto;
+  }
+
+  #mensajeUltimoCalculo{
+    display: none;
   }
