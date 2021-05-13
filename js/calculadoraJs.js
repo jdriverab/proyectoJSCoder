@@ -34,8 +34,8 @@ class CalculadoraPrestamos{
       $("#mensajeDatos").html(``)
   
       $("#divBotonCalculadora").html(`<div class="divBotonCalculadora">
-      <button type="button" class="btn btn-primary btn-block" onclick="capturaYEjecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
-      <button type="button" class="btn btn-info btn-block" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
+      <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="capturaYEjecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
+      <button type="button" class="btn btn-info btn-block botonCalculadora" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
       </div>`)
   
       $("#pagoMensual").html(`${this.montoAPagarUnMes.toLocaleString()} CLP`)
@@ -159,50 +159,59 @@ function actualizaMeses(){
 */
 function crearCalculadora() {
 
-  $("#espacioCalculadora").css("display","none")
-
   $("#espacioCalculadora").html(
-  `<div class="container">
-    <div>
-      <div">
-        <form class="credit">
-        <h2>Calculadora de prestamos</h2>
-          
-          <div class="form-group">
-            <label for="amount">Monto a calcular</label>
-            <div class="input-group">
-              <div class="input-group-addon">CLP</div>
-              <input type="number" min="1000" class="form-control validate" id="monto" placeholder="Ingrese el valor que desea prestar" required>
+    `<div class="container" data-aos="fade-up" data-aos-delay="100">
+      <div>
+        <div">
+          <form class="credit">
+          <h2>Calculadora de prestamos</h2>
+            
+            <div class="form-group">
+              <label for="amount">Monto a calcular</label>
+              <div class="input-group">
+                <div class="input-group-addon">CLP</div>
+                <input type="number" min="1000" class="form-control validate" id="monto" placeholder="Ingrese el valor que desea prestar" required>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="percent">Tasa de Anual</label>
-            <div class="input-group">
-              <div class="input-group-addon"> %</div>
-              <input type="number" min="0.01" step="0.01" class="form-control validate" id="tasa" placeholder="Tasa de interes a calcular" required>
+            <div class="form-group">
+              <label for="percent">Tasa de Anual</label>
+              <div class="input-group">
+                <div class="input-group-addon"> %</div>
+                <input type="number" min="0.01" step="0.01" class="form-control validate" id="tasa" placeholder="Tasa de interes a calcular" required>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Cantidad de cuotas: <span id="rangoMeses">2</span> Meses</label>
-            <input class="slider" type="range" min="2" max="24" value="1" id="meses" onmousemove="actualizaMeses()">
-
-          </div>
-          <div id="divBotonCalculadora">
-              <button type="button" class="btn btn-primary btn-block" onclick="capturaYEjecutaCalculadora()"> Calcular</button>
-
-          </div>
-
-        </form>
-        <div><h2 id="mensajeDatos"></h2><h3>Total a pagar: <span id="pagoTotal"></span><br>
-        <small>Valor cuota mensual: <span id="pagoMensual"></span></small></h3></div>
-        <div id="mensajeUltimoCalculo"></div>
-
+            <div class="form-group">
+              <label>Cantidad de cuotas: <span id="rangoMeses">2</span> Meses</label>
+              <input class="slider" type="range" min="2" max="24" value="1" id="meses" onmousemove="actualizaMeses()">
+  
+            </div>
+            <div id="divBotonCalculadora">
+                <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="capturaYEjecutaCalculadora()"> Calcular</button>
+  
+            </div>
+  
+          </form>
+          <div><h2 id="mensajeDatos"></h2><h3>Total a pagar: <span id="pagoTotal"></span><br>
+          <small>Valor cuota mensual: <span id="pagoMensual"></span></small></h3></div>
+          <div id="mensajeUltimoCalculo"></div>
+  
+        </div>
       </div>
-    </div>
-  </div>`)
-
-  $("#espacioCalculadora").fadeIn(2500)
+    </div>`
+  )
 }
+
+function animacionesBotones(){
+
+  $(".botonCalculadora").hover(()=>{
+
+    $(this).css({"width":"500px","transition":"width 3s"})
+  
+  })
+
+}
+
+
 
 
 
