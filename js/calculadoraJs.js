@@ -1,4 +1,6 @@
+let informacionPrestamo = 0
 let infoHistorica = 0
+let valoresUF = []
 
 class CalculadoraPrestamos{
     constructor(valoresIngresados){
@@ -37,9 +39,8 @@ class CalculadoraPrestamos{
       <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="capturaYEjecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
       <button type="button" class="btn btn-info btn-block botonCalculadora" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
       </div>`)
-  
-      $("#pagoMensual").html(`${this.montoAPagarUnMes.toLocaleString()} CLP`)
-      $("#pagoTotal").html(`${this.montoAPagarTotal.toLocaleString()} CLP`)
+
+      conversionAMonedaEImprime(2,[this.montoAPagarUnMes,this.montoAPagarTotal])
     }
   
     /**
@@ -104,9 +105,7 @@ function capturaYEjecutaCalculadora(){
   $("#pagoTotal").html(``)
   $("#mensajeUltimoCalculo").fadeOut(800)
 
-  let informacionPrestamo = new CalculadoraPrestamos ([document.getElementById("monto"),document.getElementById("tasa"),document.getElementById("meses")])
-
-  console.log(informacionPrestamo)
+  informacionPrestamo = new CalculadoraPrestamos ([document.getElementById("monto"),document.getElementById("tasa"),document.getElementById("meses")])
 
   informacionPrestamo.validaCamposYEjecuta()
 
@@ -123,24 +122,7 @@ function capturaYEjecutaCalculadora(){
     localStorage.setItem("historialPrestamo",JSON.stringify(infoHistorica))
   }
 
-  ultimoCalculo = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
-
-  console.log(ultimoCalculo)
-
-  if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0){
-
-    $("#mensajeUltimoCalculo").fadeIn(1200)
-
-    $("#mensajeUltimoCalculo").html(`<br>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°<br><h4>Total a pagar calculo anterior: 
-    ${ultimoCalculo[1].toLocaleString()}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}</small></h4>`)
-    
-  }else{
-
-    $("#mensajeUltimoCalculo").fadeOut(1200,()=>{
-      // $("#mensajeUltimoCalculo").html(``)
-    })
-
-  }
+  conversionAMonedaEImprime(3,[''])
 
   informacionPrestamo.guardadoSessionStorage()
 }
@@ -154,10 +136,13 @@ function actualizaMeses(){
 }
 
 /**
-* Funcion modifica el layout del index para que se muestre la calculadora al usar boton
+* Funcion modifica el layout del index para que se muestre la calculadora al usar boton, trae UF con API CMF
 *@event 
+*@api
 */
 function crearCalculadora() {
+
+  capturaUFActual()
 
   $("#espacioCalculadora").html(
     `<div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -165,6 +150,17 @@ function crearCalculadora() {
         <div">
           <form class="credit">
           <h2>Calculadora de prestamos</h2>
+
+          <div style="display:flex; align-items: baseline; justify-content:space-between; gap: 1px">
+
+            <input type="radio" class="tipoMoneda" name="monedas" value="clp" checked="true" onclick(conversionAMoneda())>
+            <label for="monedas"> CLP</label>
+            <input type="radio" class="tipoMoneda" name="monedas" value="uf style="margin-left: 15px" onclick(conversionAMoneda())>
+            <label for="monedas"> UF</label>
+
+          </div>
+
+          
             
             <div class="form-group">
               <label for="amount">Monto a calcular</label>
@@ -191,8 +187,8 @@ function crearCalculadora() {
             </div>
   
           </form>
-          <div><h2 id="mensajeDatos"></h2><h3>Total a pagar: <span id="pagoTotal"></span><br>
-          <small>Valor cuota mensual: <span id="pagoMensual"></span></small></h3></div>
+          <div><h2 id="mensajeDatos"></h2><h3>Total a pagar: <span id="pagoTotal" style="display:none"></span><br>
+          <small>Valor cuota mensual: <span id="pagoMensual" style="display:none"></span></small></h3></div>
           <div id="mensajeUltimoCalculo"></div>
   
         </div>
@@ -201,21 +197,81 @@ function crearCalculadora() {
   )
 }
 
-function animacionesBotones(){
 
-  $(".botonCalculadora").hover(()=>{
+/**
+* Funcion actualiza los valores segun la moneda seleccionada
+*@param {number} 1-Toma datos de calculadora, 2-Toma datos de parametro 2, 3-Toma datos de sessionStorage
+*@param {Array} informacionUltimoPrestamo
+*@event
+*@DOM
+*/
+function conversionAMonedaEImprime(x,z) {
+  ultimoCalculo = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
+  tipoMonedaElegida = ""
+  valorImprimir = [informacionPrestamo.montoAPagarUnMes,informacionPrestamo.montoAPagarTotal]
 
-    $(this).css({"width":"500px","transition":"width 3s"})
+  if(document.getElementsByClassName("tipoMoneda")[0].checked){
+    tipoMonedaElegida = "CLP"
+  }else{
+    tipoMonedaElegida = "UF"
+
+    valorImprimir = valorImprimir.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
+    ultimoCalculo = ultimoCalculo.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
+    z = z.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
+  }
+
+  console.log(valorImprimir)
+  console.log(tipoMonedaElegida)
+
+  switch(x){
+    
+    case 1: 
+      animacionesDOM($("#pagoMensual"),valorImprimir[0],tipoMonedaElegida)
+      animacionesDOM($("#pagoTotal"),valorImprimir[1],tipoMonedaElegida)
+      break;
   
-  })
+    case 2:
+      animacionesDOM($("#pagoMensual"),z[0],tipoMonedaElegida)
+      animacionesDOM($("#pagoTotal"),z[1],tipoMonedaElegida)
+      break;
 
+    case 3:
+  
+      if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0){
+
+        $("#mensajeUltimoCalculo").fadeIn(1200)
+
+        $("#mensajeUltimoCalculo").html(`<p>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°</p><h4>Total a pagar calculo anterior: 
+        ${ultimoCalculo[1].toLocaleString()}${tipoMonedaElegida}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}${tipoMonedaElegida}</small></h4>`)
+                    
+      }else{
+
+        $("#mensajeUltimoCalculo").fadeOut(1200,()=>{
+          $("#mensajeUltimoCalculo").html(``)
+        })
+      }
+    break;
+  }
 }
 
+/**
+* Funcion que continene animacion para que aparezcan resultados en DOM
+*@event
+*@DOM
+*/
+function animacionesDOM(x,y,z) {
+  x.fadeOut(300,()=>{ 
+    x.html(`${y.toLocaleString()}${z}`)
+    x.fadeIn(1000)
+  })
+}
 
+/**
+* Funcion para traer valor de UF del dia a traves de API CMF
+*@api
+*@return {Array} valoresUF
+*/
+async function capturaUFActual(){
 
-
-
-
-
-
-
+  valoresUF = await fetch("https://api.sbif.cl/api-sbifv3/recursos_api/uf?apikey=0c4156bf5534ee201313a0355825c2a2f9276a13&formato=JSON").then(res=>res.json())
+}
