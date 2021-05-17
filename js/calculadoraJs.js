@@ -1,95 +1,101 @@
-let informacionPrestamo = 0
-let infoHistorica = 0
+let informacionPrestamo = {}
+let infoHistorica = []
 let valoresUF = []
 
 class CalculadoraPrestamos{
-    constructor(valoresIngresados){
-      this.monto = Number(valoresIngresados[0].value);
-      this.interes = Number(valoresIngresados[1].value);
-      this.meses = Number(valoresIngresados[2].value);
-      this.montoAPagarUnMes = 0;
-      this.montoAPagarTotal = 0;
-      this.camposDeValores = valoresIngresados;
+  constructor(valoresIngresados){
+    this.monto = Number(valoresIngresados[0].value);
+    this.interes = Number(valoresIngresados[1].value);
+    this.meses = Number(valoresIngresados[2].value);
+    this.montoAPagarUnMes = 0;
+    this.montoAPagarTotal = 0;
+    this.camposDeValores = valoresIngresados;
+    this.montoAPagarUF =[]
+  }
+
+  /**
+ * Este metodo modifica el DOM; metodo principal con secuencia de ejecucion para objeto calculadora (limpia campos ingresados, valida los que tienen numero, si cumple borra los valores del calculo anterior y ejecuta un nuevo calculo, sino notifica que debe corregir campo.
+ * @param {number} this.monto
+ * @param {number} this.interes
+ * @param {number} this.meses
+ */
+  validaCamposYEjecutaCalculadora(){
+    let validador = true
+
+    limpiaDOM($("#pagoMensual"))
+    limpiaDOM($("#pagoTotal"))
+
+    for(let i = 0; i < this.camposDeValores.length; i++){
+        if(this.camposDeValores[i].value == "" || this.camposDeValores[i].value == NaN){
+
+            $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
+
+            $("#mensajeDatos").fadeIn(1400)
+
+          this.camposDeValores[i].focus()
+          validador = false
+          break
+
+        }if(this.camposDeValores[i].value == 0){
+          $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
+
+          $("#mensajeDatos").fadeIn(1400)
+          this.camposDeValores[i].focus()
+          validador = false
+          break
+        }
     }
-  
-    /**
-     * Metodo recibe datos ingresados y regresa el valor a pagar del prestamo por mes y por el total
-     * @param {number} this.monto
-     * @param {number} this.interes
-     * @param {number} this.meses
-     * @return {number} this.montoAPagarUnMes
-     * @return {number} this.montoAPagarTotal
-     */
+
+    if(validador){
+      $("#mensajeDatos").fadeOut(1400)
+      this.calculaResultadoPrestamo()
+      this.imprimeResultado()
+      this.guardadoSessionStorage()
+    }
+  }
+
+  /**
+   * Metodo recibe datos ingresados y regresa el valor a pagar del prestamo por mes y por el total en CLP
+   * @param {number} this.monto
+   * @param {number} this.interes
+   * @param {number} this.meses
+   * @return {number} this.montoAPagarUnMes (entrega resultado en CLP)
+   * @return {number} this.montoAPagarTotal (entrega resultado en CLP)
+   */
     calculaResultadoPrestamo(){
-      this.montoAPagarTotal = Math.ceil((this.monto * (this.interes/1200) * this.meses) + this.monto)
-      this.montoAPagarUnMes = Math.ceil(this.montoAPagarTotal/this.meses)
-    }
-  
-    /**
-     * Metodo interactua con DOM para mostrar resultado y agregar boton de contacto, (recibe los datos calculados del prestamo, imprime en html los resultados y agrega un nuevo boton al layout de la calculadora)
-     * @param {number} this.monto
-     * @param {number} this.interes
-     * @param {number} this.meses
-     */
-    imprimeResultado(){
-  
-      $("#mensajeDatos").html(``)
-  
-      $("#divBotonCalculadora").html(`<div class="divBotonCalculadora">
-      <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="capturaYEjecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
-      <button type="button" class="btn btn-info btn-block botonCalculadora" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
-      </div>`)
+    this.montoAPagarTotal = Math.ceil((this.monto * (this.interes/1200) * this.meses) + this.monto)
+    this.montoAPagarUnMes = Math.ceil(this.montoAPagarTotal/this.meses)
+    this.montoAPagarUF = [Math.ceil(this.montoAPagarUnMes/valoresUF),Math.ceil(this.montoAPagarTotal/valoresUF)]
+  }  
 
-      conversionAMonedaEImprime(2,[this.montoAPagarUnMes,this.montoAPagarTotal])
-    }
-  
-    /**
-     * Metodo almacena los datos del objeto creado en el local y sesion storage
-     * 
-     */
-     guardadoSessionStorage(){
-      let informacionUltimoPrestamo = [this.montoAPagarUnMes, this.montoAPagarTotal]
-      sessionStorage.setItem("ultimoPrestamo",JSON.stringify(informacionUltimoPrestamo))
-    }
-  
-  
-    /**
-     * Este metodo modifica el DOM; metodo principal con secuencia de ejecucion para calculadora (valida campos ingresados con numero, si cumple borra los valores del calculo anterior y ejecuta un nuevo calculo.
-     * @param {number} this.monto
-     * @param {number} this.interes
-     * @param {number} this.meses
-     */
-    validaCamposYEjecuta(){
-      $("#pagoMensual").html(``)
-      $("#pagoTotal").html(``)
-        var validador = true
-        for(let i = 0; i < this.camposDeValores.length; i++){
-            if(this.camposDeValores[i].value == "" || this.camposDeValores[i].value == NaN){
+  /**
+   * Metodo interactua con DOM para mostrar resultado y agregar boton de contacto, (recibe los datos calculados del prestamo, imprime en html los resultados y agrega un nuevo boton al layout de la calculadora)
+   * @param {number} this.monto
+   * @param {number} this.interes
+   * @param {number} this.meses
+   */
+  imprimeResultado(){
 
-                $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
+    limpiaDOM($("#mensajeDatos"))
 
-                $("#mensajeDatos").fadeIn(1400)
+    $("#divBotonCalculadora").html(`<div class="divBotonCalculadora">
+    <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="ejecutaCalculadora()" id="botonCalculadora">Re-calcular</button>
+    <button type="button" class="btn btn-info btn-block botonCalculadora" onclick="location.href='#contact-section'"style="margin-top:0px">Pide tu credito ya!</button>
+    </div>`)
 
-              this.camposDeValores[i].focus()
-              validador = false
-              break
+    conversionAMonedaEImprime()
+  }
 
-            }if(this.camposDeValores[i].value == 0){
-              $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
+  /**
+   * Metodo almacena los datos del objeto creado en el local y sesion storage
+   * @param {number} this.montoAPagarUnMes
+   * @param {number} this.montoAPagarTotal
+   */
+    guardadoSessionStorage(){
+    let informacionUltimoPrestamo = [this.montoAPagarUnMes, this.montoAPagarTotal,this.montoAPagarUF[0],this.montoAPagarUF[1]]
+    sessionStorage.setItem("ultimoPrestamo",JSON.stringify(informacionUltimoPrestamo))
+  }
 
-              $("#mensajeDatos").fadeIn(1400)
-              this.camposDeValores[i].focus()
-              validador = false
-              break
-            }
-        }
-
-        if(validador){
-          $("#mensajeDatos").fadeOut(1400)
-          this.calculaResultadoPrestamo()
-          this.imprimeResultado()
-        }
-    }
 }
   
 /** 
@@ -99,15 +105,22 @@ class CalculadoraPrestamos{
 *@param {number} meses
 *@event 
 */
-function capturaYEjecutaCalculadora(){
+function ejecutaCalculadora(){
+  campoMonto = document.getElementById("monto")
+  campoInteres = document.getElementById("tasa")
+  campoMeses = document.getElementById("meses")
 
-  $("#pagoMensual").html(``)
-  $("#pagoTotal").html(``)
+  ultimoCalculoLocal = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
+
+  validaStorageEImprime(ultimoCalculoLocal)
+
+  limpiaDOM($("#pagoMensual"))
+  limpiaDOM($("#pagoTotal"))
+
   $("#mensajeUltimoCalculo").fadeOut(800)
+  informacionPrestamo = new CalculadoraPrestamos ([campoMonto,campoInteres,campoMeses])
 
-  informacionPrestamo = new CalculadoraPrestamos ([document.getElementById("monto"),document.getElementById("tasa"),document.getElementById("meses")])
-
-  informacionPrestamo.validaCamposYEjecuta()
+  informacionPrestamo.validaCamposYEjecutaCalculadora()
 
   if(informacionPrestamo.montoAPagarTotal > 0){
 
@@ -121,10 +134,6 @@ function capturaYEjecutaCalculadora(){
     }
     localStorage.setItem("historialPrestamo",JSON.stringify(infoHistorica))
   }
-
-  conversionAMonedaEImprime(3,[''])
-
-  informacionPrestamo.guardadoSessionStorage()
 }
   
 /**
@@ -153,9 +162,9 @@ function crearCalculadora() {
 
           <div style="display:flex; align-items: baseline; justify-content:space-between; gap: 1px">
 
-            <input type="radio" class="tipoMoneda" name="monedas" value="clp" checked="true" onclick(conversionAMoneda())>
+            <input type="radio" class="tipoMoneda" name="monedas" value="clp" checked="true" onclick="conversionAMonedaEImprime()">
             <label for="monedas"> CLP</label>
-            <input type="radio" class="tipoMoneda" name="monedas" value="uf style="margin-left: 15px" onclick(conversionAMoneda())>
+            <input type="radio" class="tipoMoneda" name="monedas" value="uf" style="margin-left: 15px" onclick="conversionAMonedaEImprime()">
             <label for="monedas"> UF</label>
 
           </div>
@@ -165,7 +174,7 @@ function crearCalculadora() {
             <div class="form-group">
               <label for="amount">Monto a calcular</label>
               <div class="input-group">
-                <div class="input-group-addon">CLP</div>
+                <div class="input-group-addon" id="tipoMonedaDOM">CLP</div>
                 <input type="number" min="1000" class="form-control validate" id="monto" placeholder="Ingrese el valor que desea prestar" required>
               </div>
             </div>
@@ -182,7 +191,7 @@ function crearCalculadora() {
   
             </div>
             <div id="divBotonCalculadora">
-                <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="capturaYEjecutaCalculadora()"> Calcular</button>
+                <button type="button" class="btn btn-primary btn-block botonCalculadora" onclick="ejecutaCalculadora()"> Calcular</button>
   
             </div>
   
@@ -199,65 +208,44 @@ function crearCalculadora() {
 
 
 /**
-* Funcion actualiza los valores segun la moneda seleccionada
-*@param {number} 1-Toma datos de calculadora, 2-Toma datos de parametro 2, 3-Toma datos de sessionStorage
-*@param {Array} informacionUltimoPrestamo
-*@event
-*@DOM
+* Funcion actualiza los valores segun la moneda seleccionada, se inicia con evento y como llamada en funcion
+*@param {number} tipoOperacion 1-Toma_datos-de-calculadora,_2-Toma-datos-de-parametro-montoAUsar,_3-Toma-datos-de-sessionStorage
+*@see {number} valorImprimir -Solo-se-usa-cuando-tipoOperacion-es-"1"
+*@param {Array} montoAUsar -Solo-se-usa-cuando-tipoOperacion-es-"2"-(usa-en-calculos-este-valor-sin-importar-propiedad-precio-de-objeto-actual)
+*@see {Array} ultimoCalculo -Solo-se-usa-cuando-tipoOperacion-es-"3"(Toma-array-de-sessionStorage)
 */
-function conversionAMonedaEImprime(x,z) {
-  ultimoCalculo = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
+function conversionAMonedaEImprime(){
   tipoMonedaElegida = ""
-  valorImprimir = [informacionPrestamo.montoAPagarUnMes,informacionPrestamo.montoAPagarTotal]
+  esCLP = document.getElementsByClassName("tipoMoneda")[0].checked
+  ultimoCalculoLocal = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
 
-  if(document.getElementsByClassName("tipoMoneda")[0].checked){
-    tipoMonedaElegida = "CLP"
+  console.log(ultimoCalculoLocal)
+
+  if(esCLP){
+    animacionesDOM($("#tipoMonedaDOM"),"","CLP")
   }else{
-    tipoMonedaElegida = "UF"
-
-    valorImprimir = valorImprimir.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
-    ultimoCalculo = ultimoCalculo.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
-    z = z.forEach((v)=>{return Number(v)*Number(valoresUF.UFs[0].Valor)})
+    animacionesDOM($("#tipoMonedaDOM"),"","UF")
   }
-
-  console.log(valorImprimir)
-  console.log(tipoMonedaElegida)
-
-  switch(x){
-    
-    case 1: 
-      animacionesDOM($("#pagoMensual"),valorImprimir[0],tipoMonedaElegida)
-      animacionesDOM($("#pagoTotal"),valorImprimir[1],tipoMonedaElegida)
-      break;
   
-    case 2:
-      animacionesDOM($("#pagoMensual"),z[0],tipoMonedaElegida)
-      animacionesDOM($("#pagoTotal"),z[1],tipoMonedaElegida)
-      break;
-
-    case 3:
-  
-      if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0){
-
-        $("#mensajeUltimoCalculo").fadeIn(1200)
-
-        $("#mensajeUltimoCalculo").html(`<p>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°</p><h4>Total a pagar calculo anterior: 
-        ${ultimoCalculo[1].toLocaleString()}${tipoMonedaElegida}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}${tipoMonedaElegida}</small></h4>`)
-                    
-      }else{
-
-        $("#mensajeUltimoCalculo").fadeOut(1200,()=>{
-          $("#mensajeUltimoCalculo").html(``)
-        })
-      }
-    break;
+  if(informacionPrestamo.montoAPagarTotal >0){
+    if(esCLP){
+      tipoMonedaElegida = "CLP"
+      montoAUsar = [informacionPrestamo.montoAPagarUnMes, informacionPrestamo.montoAPagarTotal]
+    }else{
+      tipoMonedaElegida = "UF"
+      montoAUsar = informacionPrestamo.montoAPagarUF
+    }
+    validaStorageEImprime(ultimoCalculoLocal)
+    animacionesDOM($("#pagoMensual"),montoAUsar[0],tipoMonedaElegida)
+    animacionesDOM($("#pagoTotal"),montoAUsar[1],tipoMonedaElegida)
   }
 }
 
 /**
 * Funcion que continene animacion para que aparezcan resultados en DOM
-*@event
-*@DOM
+*@param {object} x =nodo-a-modificar
+*@param {Number} y =monto-a-considerar
+*@param {String} z =moneda-a-considerar
 */
 function animacionesDOM(x,y,z) {
   x.fadeOut(300,()=>{ 
@@ -267,11 +255,34 @@ function animacionesDOM(x,y,z) {
 }
 
 /**
-* Funcion para traer valor de UF del dia a traves de API CMF
-*@api
+* Funcion para traer valor de UF del dia a traves de API CMF - Se llama a traves de evento
 *@return {Array} valoresUF
 */
 async function capturaUFActual(){
-
   valoresUF = await fetch("https://api.sbif.cl/api-sbifv3/recursos_api/uf?apikey=0c4156bf5534ee201313a0355825c2a2f9276a13&formato=JSON").then(res=>res.json())
+  valoresUF = parseFloat(valoresUF.UFs[0].Valor)
+}
+
+/**
+* Funcion recibe cualquier valor y si es != null, [0] > 0 y infoprestamo > 0 entonces escribe el resultado, 
+*@param {array} arrayAValidar este debe ser extraido del storage
+*@return {boolean}
+*/
+function validaStorageEImprime(ultimoCalculo){
+
+  if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0 && informacionPrestamo.montoAPagarTotal != ultimoCalculo[1]){
+
+    $("#mensajeUltimoCalculo").fadeIn(1200)
+
+    $("#mensajeUltimoCalculo").html(`<p>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°</p><h4>Total a pagar calculo anterior: 
+    ${ultimoCalculo[1].toLocaleString()}${tipoMonedaElegida}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}${tipoMonedaElegida}</small></h4>`)
+                
+  }else{
+
+    $("#mensajeUltimoCalculo").fadeOut(1200,()=>{limpiaDOM($("#mensajeUltimoCalculo"))})
+  }
+}
+
+function limpiaDOM(nodo){
+  nodo.html('')
 }
