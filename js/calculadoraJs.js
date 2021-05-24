@@ -1,6 +1,7 @@
 let informacionPrestamo = {}
 let infoHistorica = []
 let valoresUF = []
+let tipoMonedaElegida = ""
 
 class CalculadoraPrestamos{
   constructor(valoresIngresados){
@@ -28,18 +29,23 @@ class CalculadoraPrestamos{
     for(let i = 0; i < this.camposDeValores.length; i++){
         if(this.camposDeValores[i].value == "" || this.camposDeValores[i].value == NaN){
 
-            $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
+          animacionesDOM($("#mensajeDatos"),'','Debe ingresar datos en todos los campos')
 
-            $("#mensajeDatos").fadeIn(1400)
+            // $("#mensajeDatos").html('Debe ingresar datos en todos los campos')
+
+            // $("#mensajeDatos").fadeIn(1400)
 
           this.camposDeValores[i].focus()
           validador = false
           break
 
         }if(this.camposDeValores[i].value == 0){
-          $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
 
-          $("#mensajeDatos").fadeIn(1400)
+          animacionesDOM($("#mensajeDatos"),'','El valor ingresado debe ser mayor a 0')
+
+          // $("#mensajeDatos").html(`El valor ingresado debe ser mayor a 0`)
+
+          // $("#mensajeDatos").fadeIn(1400)
           this.camposDeValores[i].focus()
           validador = false
           break
@@ -112,7 +118,11 @@ function ejecutaCalculadora(){
 
   ultimoCalculoLocal = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
 
-  validaStorageEImprime(ultimoCalculoLocal)
+  if(ultimoCalculoLocal != null){
+    validaStorageEImprime(ultimoCalculoLocal)
+  }else{
+    validaStorageEImprime([0])
+  }
 
   limpiaDOM($("#pagoMensual"))
   limpiaDOM($("#pagoTotal"))
@@ -138,16 +148,13 @@ function ejecutaCalculadora(){
   
 /**
  * Funcion modifica el DOM; actualiza indicador de meses en html segun el evento onmovemouse
- *@event 
 */
 function actualizaMeses(){
   $("#rangoMeses").html(`${$("#meses").val()}`)
 }
 
 /**
-* Funcion modifica el layout del index para que se muestre la calculadora al usar boton, trae UF con API CMF
-*@event 
-*@api
+* Funcion modifica el layout del index para que se muestre la calculadora al usar boton, tambien usa funcion que trae UF con API CMF
 */
 function crearCalculadora() {
 
@@ -160,13 +167,16 @@ function crearCalculadora() {
           <form class="credit">
           <h2>Calculadora de prestamos</h2>
 
-          <div style="display:flex; align-items: baseline; justify-content:space-between; gap: 1px">
+          <div style="display:flex; align-items: baseline; justify-content: center; gap: 80px">
+            <div>
+              <input type="radio" class="tipoMoneda" name="monedas" value="clp" checked="true" onclick="conversionAMonedaEImprime()">
+              <label for="monedas"> CLP</label>
+            </div>
 
-            <input type="radio" class="tipoMoneda" name="monedas" value="clp" checked="true" onclick="conversionAMonedaEImprime()">
-            <label for="monedas"> CLP</label>
-            <input type="radio" class="tipoMoneda" name="monedas" value="uf" style="margin-left: 15px" onclick="conversionAMonedaEImprime()">
-            <label for="monedas"> UF</label>
-
+            <div>
+              <input type="radio" class="tipoMoneda" name="monedas" value="uf" style="margin-left: 15px" onclick="conversionAMonedaEImprime()">
+              <label for="monedas"> UF</label>
+            </div>
           </div>
 
           
@@ -208,18 +218,15 @@ function crearCalculadora() {
 
 
 /**
-* Funcion actualiza los valores segun la moneda seleccionada, se inicia con evento y como llamada en funcion
-*@param {number} tipoOperacion 1-Toma_datos-de-calculadora,_2-Toma-datos-de-parametro-montoAUsar,_3-Toma-datos-de-sessionStorage
-*@see {number} valorImprimir -Solo-se-usa-cuando-tipoOperacion-es-"1"
-*@param {Array} montoAUsar -Solo-se-usa-cuando-tipoOperacion-es-"2"-(usa-en-calculos-este-valor-sin-importar-propiedad-precio-de-objeto-actual)
-*@see {Array} ultimoCalculo -Solo-se-usa-cuando-tipoOperacion-es-"3"(Toma-array-de-sessionStorage)
+* Funcion toma propiedades de calculadora o item de storage e imprime segun el tipo de moneda que eligio el usuario (UF o CLP); esta funcion se usa siempre para imprimir resultados
+*@see {boolean} valida si la calculadora tiene el campo "CLP" seleccionado para definir que resultado imprimir
+*@see {number} lee propiedades de informacionPrestamo e imprime el resultado segun el tipo de moneda (CLP o UF)
+*@see {number} lee item de storage e y ejecuta 
 */
 function conversionAMonedaEImprime(){
   tipoMonedaElegida = ""
   esCLP = document.getElementsByClassName("tipoMoneda")[0].checked
-  ultimoCalculoLocal = JSON.parse(sessionStorage.getItem("ultimoPrestamo"))
-
-  console.log(ultimoCalculoLocal)
+  ultimoCalculoLocal = JSON.parse(sessionStorage.getItem("ultimoPrestamo")) || [0]
 
   if(esCLP){
     animacionesDOM($("#tipoMonedaDOM"),"","CLP")
@@ -231,9 +238,11 @@ function conversionAMonedaEImprime(){
     if(esCLP){
       tipoMonedaElegida = "CLP"
       montoAUsar = [informacionPrestamo.montoAPagarUnMes, informacionPrestamo.montoAPagarTotal]
+      ultimoCalculoLocal.splice(2,2)
     }else{
       tipoMonedaElegida = "UF"
       montoAUsar = informacionPrestamo.montoAPagarUF
+      ultimoCalculoLocal.splice(0,2)
     }
     validaStorageEImprime(ultimoCalculoLocal)
     animacionesDOM($("#pagoMensual"),montoAUsar[0],tipoMonedaElegida)
@@ -242,16 +251,26 @@ function conversionAMonedaEImprime(){
 }
 
 /**
-* Funcion que continene animacion para que aparezcan resultados en DOM
-*@param {object} x =nodo-a-modificar
-*@param {Number} y =monto-a-considerar
-*@param {String} z =moneda-a-considerar
+* Funcion para imprimir datos de operacion anterior, recibe del storage y valida: si existe una operacion actual -> si existen datos en storage imprime sino borra DOM 
+*@param {array} ultimoCalculo este debe ser extraido del storage, en caso de recibir [0] solo ejecuta else
 */
-function animacionesDOM(x,y,z) {
-  x.fadeOut(300,()=>{ 
-    x.html(`${y.toLocaleString()}${z}`)
-    x.fadeIn(1000)
-  })
+function validaStorageEImprime(ultimoCalculo){
+  validaciones = [ultimoCalculo != null, ultimoCalculo[0] > 0, informacionPrestamo.montoAPagarTotal > 0, informacionPrestamo.montoAPagarTotal != ultimoCalculo[1]]
+
+  if(tipoMonedaElegida == "UF"){
+    validaciones.splice(2,2,informacionPrestamo.montoAPagarUF[1] > 0,informacionPrestamo.montoAPagarUF[1] != ultimoCalculo[1])
+  }
+
+  if(validaciones[0] && validaciones[1] && validaciones[2] && validaciones[3]){
+    textoAImprimir = `<p style="text-align: center">-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-</p><h4>Total a pagar calculo anterior: 
+    ${ultimoCalculo[1].toLocaleString()}${tipoMonedaElegida}<br><small>V
+    0
+    alor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}${tipoMonedaElegida}</small></h4>`
+
+    animacionesDOM($("#mensajeUltimoCalculo"),'',textoAImprimir)
+  }else{
+    limpiaDOM($("#mensajeUltimoCalculo"))
+  }
 }
 
 /**
@@ -264,25 +283,21 @@ async function capturaUFActual(){
 }
 
 /**
-* Funcion recibe cualquier valor y si es != null, [0] > 0 y infoprestamo > 0 entonces escribe el resultado, 
-*@param {array} arrayAValidar este debe ser extraido del storage
-*@return {boolean}
+* Funcion que continene animacion para que aparezcan resultados en DOM (fadeOut(300) -> DOM -> fadeIn(1000))
+*@param {object} nodo donde se realizara cambio
+*@param {Number} montoAImprimir (en caso de ingresar '' solo imprime textos y aplica animacion)
+*@param {String} textoAImprimir En caso de imprimir montos, debe considerar el texto 'CLP' o 'UF'
 */
-function validaStorageEImprime(ultimoCalculo){
-
-  if(ultimoCalculo != null && ultimoCalculo[0] > 0 && informacionPrestamo.montoAPagarTotal > 0 && informacionPrestamo.montoAPagarTotal != ultimoCalculo[1]){
-
-    $("#mensajeUltimoCalculo").fadeIn(1200)
-
-    $("#mensajeUltimoCalculo").html(`<p>-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°-°</p><h4>Total a pagar calculo anterior: 
-    ${ultimoCalculo[1].toLocaleString()}${tipoMonedaElegida}<br><small>Valor mensual calculo anterior: ${ultimoCalculo[0].toLocaleString()}${tipoMonedaElegida}</small></h4>`)
-                
-  }else{
-
-    $("#mensajeUltimoCalculo").fadeOut(1200,()=>{limpiaDOM($("#mensajeUltimoCalculo"))})
-  }
+function animacionesDOM(nodo,montoAImprimir,textoAImprimir) {
+  nodo.fadeOut(300,()=>{ 
+    nodo.html(`${montoAImprimir.toLocaleString()}${textoAImprimir}`)
+    nodo.fadeIn(1400)
+  })
 }
 
+/**
+* Funcion para limpiar DOM, se debe ingresar nodo y lo modifica a '' (nota:borra todo el contenido del nodo(incluso etiquetas))
+*@param {object} nodo a borrar contenido
+*/
 function limpiaDOM(nodo){
-  nodo.html('')
-}
+  nodo.fadeOut(500,()=>{ nodo.html('') })}
